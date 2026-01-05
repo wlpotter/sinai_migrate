@@ -1,12 +1,16 @@
 """
 This module contains configurations, constant variables, etc. used for the CSV to JSON transformations
 """
-import json, yaml
+import json, yaml, os, sys
 from migrate import user
 
 # CONSTANTS
 
 VALID_MODES = ["airtable", "csv"]
+VALIED_RECORD_TYPES = ["manuscript_objects", "layers", "text_units", "all"] # Note: "all" will transform all record types at once
+
+# Output directory defaults to the current working directory
+OUTPUT_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 TABLES = {}
 
@@ -48,6 +52,10 @@ def set_configs(args):
     TODO:
     - hold this space as a place to add more configurations should they prove necessary
     """
+    # set the output directory, otherwise defaults to working directory
+    if(args.output):
+        global OUTPUT_DIR
+        OUTPUT_DIR = args.output
 
 def set_mode(mode):
     global MODE

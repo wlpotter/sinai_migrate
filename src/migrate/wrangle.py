@@ -5,6 +5,8 @@ These data will be parsed and processed by other modules
 import migrate.config as config
 import pyairtable
 import pandas as pd
+import json
+import os
 
 """
 generic get data from config document that calls the airtable or pandas ones
@@ -74,3 +76,15 @@ def parse_airtable_url(url):
         keys.append(None)
 
     return keys
+
+
+"""
+Saves a data record in the configured output directory, with an optional sub directory declared
+Note: defaulting the sub_dir to "/" means it will ensure the working directory will end with a slash
+"""
+def save_record(record, file_name, sub_dir="/"):
+    save_dir = config.OUTPUT_DIR + sub_dir
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    with open(save_dir+file_name+".json", mode="w") as fh:
+            json.dump(record, fh, indent=2, ensure_ascii=False)

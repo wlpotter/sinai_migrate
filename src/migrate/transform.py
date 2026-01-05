@@ -3,6 +3,7 @@ This module holds the main logic for converting records into Portal JSON files
 """
 import migrate.config as config
 import migrate.parse as parse
+import migrate.wrangle as wrangle
 import json
 
 # the main transformation function
@@ -12,10 +13,7 @@ def transform_records(table_name: str):
         transformed_record = transform_single_record(record=main_table["data"].get(record), 
                                                      record_type=table_name,
                                                      fields=config.TABLES[table_name]["fields"])
-        file_path = f"/Users/wpotter/Desktop/SMDP-Script-Tests/{table_name}/" + transformed_record["ark"][10:]+".json" 
-        with open(file_path, mode="w") as fh:
-            json.dump(transformed_record, fh, indent=2, ensure_ascii=False)
-        # print(json.dumps(transformed_record, indent=2))
+        wrangle.save_record(record=transformed_record, file_name=transformed_record["ark"][10:], sub_dir="/"+table_name+"/")
 
 def transform_single_record(record, record_type, fields):
 
@@ -64,7 +62,7 @@ def transform_single_record(record, record_type, fields):
     result["desc_provenance"] = {
         "program": transform_program_data(desc_programs, "desc") if desc_programs["desc_program_labels"] else None, # process program info only if there is at least one label | TODO: technically not a schema requirement, so other way around?
         "rights": metadata_rights
-    } # TODO: hard-code or add a config variable for the image rights statement? Or should it be a part of the spreadsheets?
+    }
 
     # Add reconstructed_from
     result["reconstructed_from"] = parse.get_data_from_field(source=record, field_config=fields['reconstructed_from'])
