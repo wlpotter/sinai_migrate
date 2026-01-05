@@ -6,7 +6,7 @@ import migrate.config as config
 import pyairtable
 import pandas as pd
 import json
-import os
+import os, time
 
 """
 generic get data from config document that calls the airtable or pandas ones
@@ -28,6 +28,7 @@ def get_data():
         elif(config.MODE == "airtable"):
             get_table_data_from_airtable(config.TABLES[table], airtable_client)
 
+# TODO: I/O error handling or ignoring optional tables?
 def get_table_data_from_csv(table_info):
     if table_info.get("csv"):
         with open(table_info["csv"]) as fh:
@@ -88,3 +89,21 @@ def save_record(record, file_name, sub_dir="/"):
         os.makedirs(save_dir)
     with open(save_dir+file_name+".json", mode="w") as fh:
             json.dump(record, fh, indent=2, ensure_ascii=False)
+
+"""
+Saves the config.TABLES data as a JSON file for easy reuse, mostly for avoiding multiple calls to Airtable's APIs
+"""
+def cache_wrangled_tables(sub_dir="/table_cache/"):
+    save_dir = config.OUTPUT_DIR + sub_dir
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    filename = "table_cache_" + timestr + ".json"
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    with open(save_dir+filename, mode="w") as fh:
+        json.dump(config.TABLES, fh, indent=2, ensure_ascii=False)
+
+def use_cached_tables(path_to_table_cache):
+    print("Loading cached table data")
+    with open(path_to_table_cache) as fh:
+        tables = json.load(fh)
+        config.TABLES = tables

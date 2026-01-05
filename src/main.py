@@ -12,8 +12,11 @@ def main(args):
     
     migrate.config.set_configs(args)
 
-    # TODO: implement a reading from cached function if an arg is passed with a file path
-    migrate.wrangle.get_data()
+    if(args.tablecache):
+        migrate.wrangle.use_cached_tables(args.tablecache)
+    else:
+        migrate.wrangle.get_data()
+        migrate.wrangle.cache_wrangled_tables()
 
     # Migrate all record types, or the one selected
     if(args.record_type == "all"):
@@ -23,9 +26,6 @@ def main(args):
     else:
         migrate.transform.transform_records(args.record_type)
 
-    # print(migrate.config.OUTPUT_DIR)
-
-# TODO: add to tables config or main config the path to fields base directory
 
 if __name__ == "__main__":
     # Set up an argparse parser and add CLI args
@@ -48,7 +48,9 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('-o', '--output',
                         help="Set the directory where output JSON records should be stored; default is the current working directory")
-
+    parser.add_argument('-t', '--tablecache',
+                        help="A path to a JSON file representing a cached version of the data tables used in the transform. Useful for re-running Airtable data without redownloading if nothing has changed")
+    
     args = parser.parse_args()
 
     main(args)
